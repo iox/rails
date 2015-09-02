@@ -244,9 +244,12 @@ module ActiveRecord
           # Don't cache statements without bind values
           if binds.empty?
             stmt    = @connection.prepare(sql)
-            cols    = stmt.columns
-            records = stmt.to_a
-            stmt.close
+            begin
+              cols    = stmt.columns
+              records = stmt.to_a
+            ensure
+              stmt.close
+            end
             stmt = records
           else
             cache = @statements[sql] ||= {
